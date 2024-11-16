@@ -1,6 +1,9 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"math"
+)
 
 // 给定一个共有n阶的楼梯，每步可以上1阶或者2阶，请问有多少种方案可以爬到楼顶
 
@@ -175,7 +178,148 @@ func dynamic(n, m, row, col int, grid [][]int) int {
 	}
 
 }
+
+// 在限定背包容量下，能放入物品的最大值
+// 01背包 回溯 暴力搜索
+func knapsackDFS(wgt, val []int, i, c int) int {
+	// 当前没用物品或背包容量为0
+	if i == 0 || c == 0 {
+		return 0
+	}
+	// 剪枝 当前物品的容量大于当前背包的容量，只能选择不放入物品
+	if c < wgt[i-1] {
+		return knapsackDFS(wgt, val, i-1, c)
+	}
+	// 不放入当前物品，返回当前背包中的物品价值
+	no := knapsackDFS(wgt, val, i-1, c)
+	// 放入当前物品，返回当前背包中的物品价值
+	yes := knapsackDFS(wgt, val, i-1, c-wgt[i-1]) + val[i-1]
+	return int(math.Max(float64(no), float64(yes)))
+}
+
+// 记忆化搜索 重叠子问题，只计算一次
+func knapsackDFSMem(wgt, val []int, mem [][]int, i, c int) int {
+	// 当前没用物品或背包容量为0
+	if i == 0 || c == 0 {
+		return 0
+	}
+	if mem[i][c] != -1 {
+		return mem[i][c]
+	}
+	// 剪枝 当前物品的容量大于当前背包的容量，只能选择不放入物品
+	if c < wgt[i-1] {
+		return knapsackDFSMem(wgt, val, mem, i-1, c)
+	}
+	// 不放入当前物品，返回当前背包中的物品价值
+	no := knapsackDFSMem(wgt, val, mem, i-1, c)
+	// 放入当前物品，返回当前背包中的物品价值
+	yes := knapsackDFSMem(wgt, val, mem, i-1, c-wgt[i-1]) + val[i-1]
+	mem[i][c] = int(math.Max(float64(no), float64(yes)))
+	return mem[i][c]
+}
+
+// 动态规划
+func knapsackDP(wgt, val []int, cap int) int {
+	n := len(wgt)
+	dp := make([][]int, n+1)
+	for i := range dp {
+		dp[i] = make([]int, cap+1)
+	}
+	// dp[0][cap-wgt
+	for i := 1; i < n+1; i++ {
+		for c := 1; c < cap+1; c++ {
+			if c < wgt[i-1] {
+				dp[i][c] = dp[i-1][c]
+			} else {
+				dp[i][c] = int(math.Max(float64(dp[i-1][c]), float64(dp[i-1][c-wgt[i-1]]+val[i-1])))
+			}
+		}
+	}
+	return dp[n][cap]
+
+}
+
+// 空间优化
+func knapsackDPComp(wgt, val []int, cap int) int {
+	n := len(wgt)
+	dp := make([]int, cap+1)
+	for i := 1; i < n+1; i++ {
+		for c := cap; c > 0; c-- {
+			if wgt[i-1] <= c {
+				dp[c] = int(math.Max(float64(dp[c]), float64(dp[c-wgt[i-1]]+val[i-1])))
+			}
+		}
+	}
+	return dp[cap]
+
+}
+
+// 完全背包 每个物品可以重复选取
+func unboundKnapsackDP(wgt, val []int, cap int) int {
+	n := len(wgt)
+	dp := make([][]int, n+1)
+	for i := range dp {
+		dp[i] = make([]int, cap+1)
+	}
+
+	for i := 1; i < n+1; i++ {
+		for c := 1; c < cap+1; c++ {
+			if c < wgt[i-1] {
+				dp[i][c] = dp[i-1][c]
+			} else {
+				dp[i][c] = int(math.Max(float64(dp[i-1][c]), float64(dp[i][c-wgt[i-1]]+val[i-1])))
+			}
+		}
+	}
+	return dp[n][cap]
+}
+
+func unboundKnapsackDPComp(wgt, val []int, cap int) int {
+	n := len(wgt)
+	dp := make([]int, cap+1)
+	for i := 1; i < n+1; i++ {
+		for c := 1; c < cap+1; c++ {
+			if wgt[i-1] <= c {
+				dp[c] = int(math.Max(float64(dp[c]), float64(dp[c-wgt[i-1]]+val[i-1])))
+			}
+		}
+	}
+	return dp[cap]
+}
+
+func greedy(amt int, coins []int) (total int) {
+	for i := len(coins) - 1; i >= 0; i-- {
+		coin := coins[i]
+		total += amt / coin
+		amt = amt % coin
+	}
+	return
+}
+
+func moneyDFS(i, amt int, coins []int) int {
+	if amt == 0 || i == 0 {
+		return amt + 1
+	}
+	if amt < coins[i-1] {
+		return moneyDFS(i-1, amt, coins)
+	}
+	no := moneyDFS(i-1, amt, coins)
+	yes := moneyDFS(i, amt-coins[i-1], coins) + 1
+	return int(math.Min(float64(no), float64(yes)))
+}
+func testknapsack() {
+	n := 5
+	cap := 50
+	wgt := []int{10, 20, 30, 40, 50}
+	val := []int{50, 120, 150, 210, 240}
+	fmt.Printf("有%d个物品，背包容量为%d，可以得到最大价值为%d\n", n, cap, knapsackDPComp(wgt, val, cap))
+
+}
+
 func main() {
+	coins := []int{1, 2, 5}
+	// fmt.Println(greedy(11, coins))
+	fmt.Println(moneyDFS(3, 11, coins))
 	// a := []int{1, 2}
 	// fmt.Println(subsetSum(a, 3))
 	// fmt.Println(climbingStairsDFS(5))
@@ -185,5 +329,7 @@ func main() {
 	// cost := []int{0, 1, 10, 1}
 	// fmt.Println(minCostClimbingStairsDP(cost))
 
-	fmt.Println(climbingStairsConstraintDP(4))
+	// fmt.Println(climbingStairsConstraintDP(4))
+
+	// testknapsack()
 }
