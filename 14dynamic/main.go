@@ -293,6 +293,7 @@ func greedy(amt int, coins []int) (total int) {
 		total += amt / coin
 		amt = amt % coin
 	}
+
 	return
 }
 
@@ -315,11 +316,145 @@ func testknapsack() {
 	fmt.Printf("有%d个物品，背包容量为%d，可以得到最大价值为%d\n", n, cap, knapsackDPComp(wgt, val, cap))
 
 }
+func coinChangeDP(amt int, coins []int) int {
+	n := len(coins)
+	dp := make([][]int, n+1)
+	for i := range dp {
+		dp[i] = make([]int, amt+1)
+	}
+	// 当i=0时，没有硬币数量，无法凑出大于1的目标金额，是无效解
+	for a := 1; a < len(dp[0]); a++ {
+		dp[0][a] = amt + 1
+	}
+	for i := 1; i < n+1; i++ {
+		for a := 1; a < amt+1; a++ {
+			if a < coins[i-1] {
+				dp[i][a] = dp[i-1][a]
+			} else {
+				dp[i][a] = int(math.Min(float64(dp[i-1][a]), float64(dp[i][a-coins[i-1]]+1)))
+			}
+		}
+	}
+	if dp[n][amt] == amt+1 {
+		return -1
+	}
+	return dp[n][amt]
 
+}
+func coinChangeDPComp(amt int, coins []int) int {
+	n := len(coins)
+	dp := make([]int, amt+1)
+	for i := 1; i < amt+1; i++ {
+		dp[i] = amt + 1
+	}
+	for i := 1; i < n+1; i++ {
+		for a := 1; a < amt+1; a++ {
+			if coins[i-1] <= a {
+				dp[a] = int(math.Min(float64(dp[a]), float64(dp[a-coins[i-1]]+1)))
+			}
+		}
+	}
+	if dp[amt] != amt+1 {
+		return dp[amt]
+	}
+	return -1
+}
+
+func coinChangeIIDP(amt int, coins []int) int {
+	n := len(coins)
+	dp := make([][]int, n+1)
+	for i := range dp {
+		dp[i] = make([]int, amt+1)
+	}
+	// 当目标金额为0时，也是一种情况，有且只有一种硬币组合数量，就是不选硬币，
+	for i := 0; i < n+1; i++ {
+		dp[i][0] = 1
+		if i != 0 {
+			for a := 1; a < amt+1; a++ {
+				if a < coins[i-1] {
+					dp[i][a] = dp[i-1][a]
+				} else {
+					dp[i][a] = dp[i-1][a] + dp[i][a-coins[i-1]]
+				}
+			}
+		}
+	}
+	return dp[n][amt]
+
+}
+
+func coinChangeIIDPComp(amt int, coins []int) int {
+	n := len(coins)
+	dp := make([]int, amt+1)
+	// 当目标金额为0时，也是一种情况，有且只有一种硬币组合数量，就是不选硬币，
+	dp[0] = 1
+	for i := 1; i < n+1; i++ {
+		for a := 1; a < amt+1; a++ {
+			if coins[i-1] <= a {
+				dp[a] = dp[a] + dp[a-coins[i-1]]
+			}
+		}
+	}
+	return dp[amt]
+
+}
+
+func editDistanceDP(s, t string) int {
+	n, m := len(s), len(t)
+	dp := make([][]int, n+1)
+	for i := range dp {
+		dp[i] = make([]int, m+1)
+	}
+	for j := 1; j < m+1; j++ {
+		dp[0][j] = j
+	}
+	for i := 1; i < n+1; i++ {
+		dp[i][0] = i
+	}
+	for i := 1; i < n+1; i++ {
+		for j := 1; j < m+1; j++ {
+			// 当s和t末尾的字符相等时，无需操作
+			if s[i-1] == t[j-1] {
+				dp[i][j] = dp[i-1][j-1]
+			} else {
+				dp[i][j] = int(math.Min(float64(dp[i][j-1]), math.Min(float64(dp[i-1][j]), float64(dp[i-1][j-1])))) + 1
+			}
+		}
+
+	}
+	return dp[n][m]
+}
+
+func editDistanceDPComp(s, t string) int {
+	n, m := len(s), len(t)
+	dp := make([]int, m+1)
+	// 当s为空字符串时，更改为t字符串需要t的长度次数的操作
+	for j := 1; j < m+1; j++ {
+		dp[j] = j
+	}
+	for i := 1; i < n+1; i++ {
+		leftup := dp[0] // dp[i-1][j-1]
+		dp[0] = i       // dp[i, j-1]
+		for j := 1; j < m+1; j++ {
+			temp := dp[j] // dp[i-1][j]
+			if s[i-1] == t[j-1] {
+				dp[j] = leftup
+			} else {
+				dp[j] = int(math.Min(float64(dp[j-1]), math.Min(float64(dp[j]), float64(leftup)))) + 1
+			}
+			leftup = temp
+		}
+	}
+	return dp[m]
+}
 func main() {
-	coins := []int{1, 2, 5}
+	// coins := []int{1, 2, 5}
 	// fmt.Println(greedy(11, coins))
-	fmt.Println(moneyDFS(3, 11, coins))
+	// fmt.Println(moneyDFS(3, 11, coins))
+	// fmt.Println(coinChangeDP(11, coins))
+	// fmt.Println(coinChangeDPComp(11, coins))
+	// fmt.Println(coinChangeIIDP(5, coins))
+	// fmt.Println(coinChangeIIDPComp(5, coins))
 	// a := []int{1, 2}
 	// fmt.Println(subsetSum(a, 3))
 	// fmt.Println(climbingStairsDFS(5))
@@ -332,4 +467,8 @@ func main() {
 	// fmt.Println(climbingStairsConstraintDP(4))
 
 	// testknapsack()
+
+	fmt.Println(editDistanceDPComp("kitten", "sitting"))
+	fmt.Println(editDistanceDP("hello", "algo"))
+
 }
