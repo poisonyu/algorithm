@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"math"
+	"sort"
 )
 
 // 给定一个共有n阶的楼梯，每步可以上1阶或者2阶，请问有多少种方案可以爬到楼顶
@@ -447,28 +448,149 @@ func editDistanceDPComp(s, t string) int {
 	}
 	return dp[m]
 }
+
+// func main() {
+// 	// coins := []int{1, 2, 5}
+// 	// fmt.Println(greedy(11, coins))
+// 	// fmt.Println(moneyDFS(3, 11, coins))
+// 	// fmt.Println(coinChangeDP(11, coins))
+// 	// fmt.Println(coinChangeDPComp(11, coins))
+// 	// fmt.Println(coinChangeIIDP(5, coins))
+// 	// fmt.Println(coinChangeIIDPComp(5, coins))
+// 	// a := []int{1, 2}
+// 	// fmt.Println(subsetSum(a, 3))
+// 	// fmt.Println(climbingStairsDFS(5))
+// 	// fmt.Println(climbingStairsDFSMem(5))
+// 	// fmt.Println(climbingStairsDP(5))
+// 	// fmt.Println(climbingStairsDPComp(5))
+// 	// cost := []int{0, 1, 10, 1}
+// 	// fmt.Println(minCostClimbingStairsDP(cost))
+
+// 	// fmt.Println(climbingStairsConstraintDP(4))
+
+// 	// testknapsack()
+
+// 	fmt.Println(editDistanceDPComp("kitten", "sitting"))
+// 	fmt.Println(editDistanceDP("hello", "algo"))
+
+// }
+
+// type Item struct {
+// 	w int
+// 	v int
+// }
+// func fractionalKnapsack(wgt, val []int,cap int) float64 {
+// 	items := make([]Item, len(wgt))
+// 	for i:=0 ; i< len(wgt); i++ {
+// 		items[i] = Item{w: wgt[i], v: val[i]}
+// 	}
+// 	sort.Slice(items, func(i, j int) bool {
+// 		return float64(items[i].v)/float64(items[i].w) > float64(items[j].v)/float64(items[j].w)
+// 	})
+// 	for cap > 0 {
+
+// 	}
+// 	return
+// }
+
+// 分数背包问题 最大化单位重量下的物品价值 每轮贪心的选择单位价值最高的物品
+type Item struct {
+	w     int
+	v     int
+	price float64
+}
+
+func fractionalKnapsack(wgt, val []int, cap int) float64 {
+	items := make([]Item, len(wgt))
+	for i := 0; i < len(wgt); i++ {
+		items[i] = Item{w: wgt[i], v: val[i], price: float64(val[i]) / float64(wgt[i])}
+	}
+	sort.Slice(items, func(i, j int) bool {
+		// return float64(items[i].v)/float64(items[i].w) > float64(items[j].v)/float64(items[j].w)
+		return items[i].price > items[j].price
+	})
+	var total float64
+	for i := 0; i < len(wgt); i++ {
+		if cap < items[i].w {
+			total += float64(cap) * items[i].price
+			break
+		} else {
+			total += float64(items[i].v)
+			cap -= items[i].w
+		}
+	}
+	return total
+}
+
+// 最大容量问题
+func maxCapacity(ht []int) (cap int) {
+	i, j := 0, len(ht)-1
+	for i < j {
+		l, h := j-i, 0
+		if ht[i] < ht[j] {
+			h = ht[i]
+			i++
+		} else {
+			h = ht[j]
+			j--
+		}
+		c := l * h
+		// c := (j-i) * int(math.Min(float64(ht[i]), float64(ht[j])))
+		if c > cap {
+			cap = c
+		}
+	}
+	return
+}
+
+// 最大切分乘积问题
+//
+//	func maxProductCutting(n int) (res int) {
+//		if n > 3 {
+//			a := n / 3
+//			res *= a * 3
+//			// n = n % 3
+//			if n == 1 {
+//				// res = (a-1)*3 + 2*2
+//				res = int(math.Pow(3, float64(a-1)) * 2 * 2)
+//			} else if n == 2 {
+//				res = int(math.Pow(3, float64(a)) * 2)
+//			} else {
+//				res = int(math.Pow(3, float64(a)))
+//			}
+//		} else {
+//			// if n == 3 {
+//			// 	res = n - 1
+//			// } else if n == 2 {
+//			// 	res = 1
+//			// }
+//			res = 1 * (n - 1)
+//		}
+//		return
+//	}
+
+// 最大切分乘积问题 >=4的整数都应该继续切分，最优切分因子为3，最多只应存在两个2
+func maxProductCutting(n int) (res int) {
+	if n <= 3 {
+		res = 1 * (n - 1)
+	}
+	a := n / 3
+	n = n % 3
+	// 余数为1时，1 * 3 < 2 * 2, 应该将最后一个3替换为2
+	if n == 1 {
+		res = int(math.Pow(3, float64(a-1)) * 2 * 2)
+	} else if n == 2 {
+		res = int(math.Pow(3, float64(a)) * 2)
+	} else {
+		res = int(math.Pow(3, float64(a)))
+	}
+	return
+}
 func main() {
-	// coins := []int{1, 2, 5}
-	// fmt.Println(greedy(11, coins))
-	// fmt.Println(moneyDFS(3, 11, coins))
-	// fmt.Println(coinChangeDP(11, coins))
-	// fmt.Println(coinChangeDPComp(11, coins))
-	// fmt.Println(coinChangeIIDP(5, coins))
-	// fmt.Println(coinChangeIIDPComp(5, coins))
-	// a := []int{1, 2}
-	// fmt.Println(subsetSum(a, 3))
-	// fmt.Println(climbingStairsDFS(5))
-	// fmt.Println(climbingStairsDFSMem(5))
-	// fmt.Println(climbingStairsDP(5))
-	// fmt.Println(climbingStairsDPComp(5))
-	// cost := []int{0, 1, 10, 1}
-	// fmt.Println(minCostClimbingStairsDP(cost))
-
-	// fmt.Println(climbingStairsConstraintDP(4))
-
-	// testknapsack()
-
-	fmt.Println(editDistanceDPComp("kitten", "sitting"))
-	fmt.Println(editDistanceDP("hello", "algo"))
-
+	// wgt := []int{10, 20, 30, 40, 50}
+	// val := []int{50, 120, 150, 210, 240}
+	// fmt.Println(fractionalKnapsack(wgt, val, 50))
+	a := []int{3, 8, 5, 2, 7, 7, 3, 4}
+	fmt.Println(maxCapacity(a))
+	fmt.Println(maxProductCutting(11))
 }
