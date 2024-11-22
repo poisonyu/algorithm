@@ -447,3 +447,51 @@ func main() {
 	radixSort(a)
 	fmt.Println(a)
 }
+
+type TreeNode struct {
+	Val   int
+	Left  *TreeNode
+	Right *TreeNode
+}
+
+func maxPath(root *TreeNode, res *int) {
+	if root == nil {
+		return
+	}
+	rootpath := maxDepth(root.Left) + maxDepth(root.Right)
+	*res = int(math.Max(float64(*res), float64(rootpath)))
+	maxPath(root.Left, res)
+	// *res = int(math.Max(float64(*res), float64(l)))
+	maxPath(root.Right, res)
+	// *res = int(math.Max(float64(*res), float64(r)))
+	// int(math.Max(float64(*res), math.Max(float64(l), float64(r))))
+}
+
+// // 当前节点的最大深度
+// func maxDepth(root *TreeNode) int {
+// 	if root == nil {
+// 		return 0
+// 	}
+// 	return int(math.Max(float64(maxDepth(root.Left)), float64(maxDepth(root.Right)))) + 1
+// }
+
+func diameterOfBinaryTree(root *TreeNode) int {
+	var res int = 1
+	maxDepth(root, &res)
+	return res - 1
+}
+
+// 返回当前节点为根节点的最大深度
+// 根节点到最远叶节点的最大路径的节点数
+func maxDepth(root *TreeNode, res *int) int {
+	if root == nil {
+		return 0
+	}
+	// 左子的最大深度
+	l := maxDepth(root.Left, res)
+	// 右子树的最大深度
+	r := maxDepth(root.Right, res)
+	// 当前根节点左右子树组成的路径
+	*res = int(math.Max(float64(*res), float64(l+r+1)))
+	return int(math.Max(float64(l), float64(r))) + 1
+}

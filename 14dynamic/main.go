@@ -155,26 +155,49 @@ func climbingStairsConstraintDP(n int) int {
 	return dp[n][1] + dp[n][2]
 }
 
-func dynamic(n, m, row, col int, grid [][]int) int {
-	// dp := make([]int, n+m-1)
-	// if row == n-1 && col == m -1 {
-	// 	total += grid[row][col]
-	// 	return total
-	// }
+func minPathSumDFS(grid [][]int)
+func dynamic(n, m int, grid [][]int) int {
 	min := func(a, b int) int {
 		if a < b {
 			return a
 		}
 		return b
 	}
-	total := 0
-	total += grid[row][col]
-	for {
-
-		total += min(grid[row+1][col], grid[row][col+1])
+	dp := make([][]int, n)
+	for i := range dp {
+		dp[i] = make([]int, m)
 	}
-
+	dp[0][0] = grid[0][0]
+	for i := 0; i < n; i++ {
+		for j := 0; j < m; j++ {
+			if i == 0 && j == 0 {
+				continue
+			}
+			if i == 0 && j > 0 {
+				dp[i][j] = dp[i][j-1] + grid[i][j]
+				continue
+			}
+			if i > 0 && j == 0 {
+				dp[i][j] = dp[i-1][j] + grid[i][j]
+				continue
+			}
+			dp[i][j] = min(dp[i-1][j], dp[i][j-1]) + grid[i][j]
+		}
+	}
+	return dp[n-1][m-1]
 }
+
+func bag(start, n int, wgt, val []int) int {
+	// return
+
+	for i := start; i < n; i++ {
+		// 放入
+		bag()
+		// 不放入
+
+	}
+}
+
 func main() {
 	// a := []int{1, 2}
 	// fmt.Println(subsetSum(a, 3))
@@ -186,4 +209,12 @@ func main() {
 	// fmt.Println(minCostClimbingStairsDP(cost))
 
 	fmt.Println(climbingStairsConstraintDP(4))
+
+	n, m := 4, 4
+	grid := make([][]int, n)
+	grid[0] = []int{1, 3, 1, 5}
+	grid[1] = []int{2, 2, 4, 2}
+	grid[2] = []int{5, 3, 2, 1}
+	grid[3] = []int{4, 3, 5, 2}
+	fmt.Println(dynamic(n, m, grid))
 }
