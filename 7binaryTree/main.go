@@ -329,3 +329,102 @@ func zigzagLevelOrder(root *TreeNode) [][]int {
 	}
 	return ans
 }
+
+// 98 验证二叉搜索树
+
+// 根节点是二叉搜索树需要满足
+// 左节点 < 根节点 < 右节点
+
+// 二叉搜索树在中序遍历后是升序的,
+// 可以通过判断是否升序来确定二叉搜索数是否有效
+//
+//	func isValidBST(root *TreeNode) bool {
+//		// if root == nil {
+//		// 	return false
+//		// }
+//		// 左右子节点都存在
+//		if root.Left != nil && root.Right != nil {
+//			return root.Val > root.Left.Val && root.Val < root.Right.Val && isValidBST(root.Left) && isValidBST(root.Right)
+//		}
+//		// 没有左右子节点
+//		if root.Left == nil && root.Right == nil {
+//			return true
+//		}
+//		// 只有左或右子节点
+//		if root.Left == nil {
+//			return root.Val < root.Right.Val && isValidBST(root.Right)
+//		} else {
+//			return root.Val > root.Left.Val && isValidBST(root.Left)
+//		}
+//	}
+func isValidBST(root *TreeNode) bool {
+	var nums []int
+	inOrder(root, &nums)
+	// n := nums[0]
+	// for i := 1; i < len(nums); i++ {
+	// 	if nums[i] > n {
+	// 		n = nums[i]
+	// 	} else {
+	// 		return false
+	// 	}
+	// }
+	for i := 0; i < len(nums)-1; i++ {
+		if nums[i] >= nums[i+1] {
+			return false
+		}
+	}
+	return true
+}
+
+func inOrder(root *TreeNode, nums *[]int) {
+	if root == nil {
+		return
+	}
+	inOrder(root.Left, nums)
+	*nums = append(*nums, root.Val)
+	inOrder(root.Right, nums)
+}
+
+// 701 二叉搜索树中的插入操作
+// 遍历
+// func insertIntoBST(root *TreeNode, val int) *TreeNode {
+// 	cur := root
+// 	// 根节点为nil时，将val作为根节点返回
+// 	if cur == nil {
+// 		return &TreeNode{Val: val}
+// 	}
+// 	var pre *TreeNode
+// 	for cur != nil {
+// 		if cur.Val == val {
+// 			return cur
+// 		}
+// 		pre = cur
+// 		if cur.Val < val {
+// 			cur = cur.Right
+// 		} else {
+// 			cur = cur.Left
+// 		}
+// 	}
+// 	if pre.Val > val {
+// 		pre.Left = &TreeNode{Val: val}
+// 	} else {
+// 		pre.Right = &TreeNode{Val: val}
+// 	}
+// 	return root
+// }
+
+// 递归
+func insertIntoBST(root *TreeNode, val int) *TreeNode {
+	if root == nil {
+		return &TreeNode{Val: val}
+	}
+	// if root.Val == val {
+	// 	return root
+	// }
+	if root.Val < val {
+		root.Right = insertIntoBST(root.Right, val)
+	} else {
+		root.Left = insertIntoBST(root.Left, val)
+	}
+	return root
+}
