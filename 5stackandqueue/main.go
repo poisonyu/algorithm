@@ -784,36 +784,110 @@ func (this *MyQueue) Empty() bool {
 	return len(this.stack) == 0 && len(this.temp) == 0
 }
 
+// 542 01矩阵
+// BFS
+// func updateMatrix(mat [][]int) [][]int {
+// 	m, n := len(mat), len(mat[0])
+// 	queue := make([][]int, 0)
+// 	visited := make([][]bool, m)
+// 	for i := range visited {
+// 		visited[i] = make([]bool, n)
+// 	}
+// 	for i := 0; i < m; i++ {
+// 		for j := 0; j < n; j++ {
+// 			if mat[i][j] == 0 {
+// 				queue = append(queue, []int{i, j})
+// 				visited[i][j] = true
+// 			}
+// 		}
+// 	}
+// 	for len(queue) > 0 {
+// 		i := queue[0][0]
+// 		j := queue[0][1]
+// 		queue = queue[1:]
+
+// 		direction := [][]int{[]int{i - 1, j}, []int{i + 1, j}, []int{i, j - 1}, []int{i, j + 1}}
+// 		for _, d := range direction {
+// 			p, q := d[0], d[1]
+// 			if p >= 0 && p < m && q >= 0 && q < n && mat[p][q] == 1 && !visited[p][q] {
+// 				mat[p][q] = mat[i][j] + 1
+// 				queue = append(queue, []int{p, q})
+// 				visited[p][q] = true
+// 			}
+// 		}
+
+// 	}
+// 	return mat
+// }
+
+// 动态规划
+
 func updateMatrix(mat [][]int) [][]int {
-	m, n := len(mat), len(mat[0])
-	queue := make([][]int, 0)
-	visited := make([][]bool, m)
-	for i := range visited {
-		visited[i] = make([]bool, n)
+	row := len(mat)
+	column := len(mat[0])
+	res := make([][]int, row)
+	for i := range res {
+		// res[i] = make([]int, column)
+		for j := range res[i] {
+			res[i][j] = math.MaxInt
+		}
 	}
-	for i := 0; i < m; i++ {
-		for j := 0; j < n; j++ {
+	for i := 0; i < row; i++ {
+		for j := 0; j < column; j++ {
 			if mat[i][j] == 0 {
-				queue = append(queue, []int{i, j})
-				visited[i][j] = true
+				res[i][j] = 0
 			}
 		}
 	}
-	for len(queue) > 0 {
-		i := queue[0][0]
-		j := queue[0][1]
-		queue = queue[1:]
-
-		direction := [][]int{[]int{i - 1, j}, []int{i + 1, j}, []int{i, j - 1}, []int{i, j + 1}}
-		for _, d := range direction {
-			p, q := d[0], d[1]
-			if p > 0 && p < m && q > 0 && q < n && mat[p][q] == 1 && !visited[p][q] {
-				mat[p][q] = mat[i][j] + 1
-				queue = append(queue, []int{p, q})
-				visited[p][q] = true
+	// 水平向左 和 竖直向上
+	for i := 0; i < row; i++ {
+		for j := 0; j < column; j++ {
+			// 竖直向上
+			if i-1 >= 0 {
+				res[i][j] = min(res[i][j], res[i-1][j]+1)
+			}
+			// 水平向左
+			if j-1 >= 0 {
+				res[i][j] = min(res[i][j], res[i][j-1]+1)
 			}
 		}
-
 	}
-	return mat
+	// 水平向左 和 竖直向下
+	for i := row - 1; i >= 0; i-- {
+		for j := 0; j < column; j++ {
+			// 竖直向下
+			if i+1 < row {
+				res[i][j] = min(res[i][j], res[i+1][j]+1)
+			}
+			// 水平向左
+			if j -1 >=0 {
+				res[i][j] = min(res[i][j], res[i][j-1]+1)
+			}
+		}
+	}
+	// 水平向右 和 竖直向下
+	for 
+	return res
+}
+
+// func dp(i, j int, mat [][]int) int {
+// 	// visited[i][j] = true
+// 	if mat[i][j] == 0 {
+// 		return 0
+// 	}
+// 	// if mat[i][j] == 1 {
+// 	upAndLeft := min(dp(i-1, j, mat), dp(i, j-1, mat)) + 1
+// 	downAndLeft := min(dp(i+1, j, mat), dp(i, j-1, mat)) + 1
+// 	upAndRight := min(dp(i-1, j, mat), dp(i, j+1, mat)) + 1
+// 	downAndRight := min(dp(i+1, j, mat), dp(i, j+1, mat))
+// 	return min(min(min(upAndLeft, downAndLeft), upAndRight), downAndRight)
+// 	// }
+// }
+
+func min(a, b int) int {
+	if a < b {
+		return a
+	} else {
+		return b
+	}
 }
