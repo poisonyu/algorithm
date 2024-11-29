@@ -560,3 +560,260 @@ func inorderTraversal(root *TreeNode) []int {
 	}
 	return nums
 }
+
+// 133 克隆图
+type Node struct {
+	Val       int
+	Neighbors []*Node
+}
+
+func cloneGraph(node *Node) *Node {
+	visited := make(map[*Node]*Node)
+	return clone(node, visited)
+}
+
+func clone(node *Node, visited map[*Node]*Node) *Node {
+	if node == nil {
+		return nil
+	}
+	res, ok := visited[node]
+	if ok {
+		return res
+	}
+	res = &Node{
+		Val:       node.Val,
+		Neighbors: make([]*Node, 0),
+	}
+	visited[node] = res
+	// for i := 0; i < len(node.Neighbors); i++ {
+	// 	neighbor := clone(node.Neighbors[i], visited)
+	// 	res.Neighbors = append(res.Neighbors, neighbor)
+	// }
+	for _, n := range node.Neighbors {
+		neighbor := clone(n, visited)
+		res.Neighbors = append(res.Neighbors, neighbor)
+	}
+	return res
+}
+
+// 200 岛屿数量
+// 把二维网格看成一个无向图 DFS
+func numIslands(grid [][]byte) int {
+	var count int
+	row := len(grid)
+	column := len(grid[0])
+	for i := 0; i < row; i++ {
+		for j := 0; j < column; j++ {
+			// 当顶点为'1'时进入dfs
+			if grid[i][j] == '1' && dfs(i, j, grid) > 0 {
+				count++
+			}
+		}
+	}
+	return count
+}
+
+func dfs(i, j int, grid [][]byte) int {
+	if i < 0 || i >= len(grid) || j < 0 || j >= len(grid[0]) || grid[i][j] == '0' {
+		return 0
+	}
+	grid[i][j] = '0'
+	// 顶点的上下左右都需要DFS
+	return dfs(i, j+1, grid) + dfs(i, j-1, grid) + dfs(i-1, j, grid) + dfs(i+1, j, grid) + 1
+
+}
+
+// 84 柱状图中最大的矩形
+// 枚举高
+// 单调栈 本题中每次入栈的元素都大于栈顶元素，否则出栈栈顶元素，
+// 将栈顶元素在heights中对应的元素作为高，
+// 将高的左右两边第一个小于高的索引差作为宽
+func largestRectangleArea(heights []int) int {
+	if len(heights) == 0 {
+		return 0
+	}
+	max := 0
+	stack := make([]int, 0)
+	for i := 0; i <= len(heights); i++ {
+		var cur int
+		if i != len(heights) {
+			cur = heights[i]
+		} else {
+			cur = 0
+		}
+		for len(stack) > 0 && heights[stack[len(stack)-1]] >= cur {
+			h := heights[stack[len(stack)-1]]
+			stack = stack[:len(stack)-1]
+			w := i
+			if len(stack) != 0 {
+				peek := stack[len(stack)-1]
+				w = i - peek - 1
+			}
+			a := h * w
+			if max < a {
+				max = a
+			}
+		}
+		stack = append(stack, i)
+	}
+	return max
+}
+
+// 232 用两个栈实现队列
+// type MyQueue struct {
+// 	stack []int
+// 	temp  []int
+// }
+
+// func Constructor() MyQueue {
+// 	return MyQueue{
+// 		stack: make([]int, 0),
+// 		temp:  make([]int, 0),
+// 	}
+// }
+
+// func (this *MyQueue) Push(x int) {
+// 	this.stack = append(this.stack, x)
+// }
+
+// func (this *MyQueue) Pop() int {
+// 	var pop int
+// 	for {
+// 		pop = this.stack[len(this.stack)-1]
+// 		this.stack = this.stack[:len(this.stack)-1]
+// 		if len(this.stack) == 0 {
+// 			break
+// 		}
+// 		this.temp = append(this.temp, pop)
+// 	}
+// 	for len(this.temp) != 0 {
+// 		p := this.temp[len(this.temp)-1]
+// 		this.temp = this.temp[:len(this.temp)-1]
+// 		this.stack = append(this.stack, p)
+// 	}
+// 	return pop
+// }
+
+// func (this *MyQueue) Peek() int {
+// 	var pop int
+// 	for len(this.stack) > 0 {
+// 		pop = this.stack[len(this.stack)-1]
+// 		this.stack = this.stack[:len(this.stack)-1]
+// 		this.temp = append(this.temp, pop)
+// 	}
+// 	for len(this.temp) != 0 {
+// 		p := this.temp[len(this.temp)-1]
+// 		this.temp = this.temp[:len(this.temp)-1]
+// 		this.stack = append(this.stack, p)
+// 	}
+// 	return pop
+// }
+
+// func (this *MyQueue) Empty() bool {
+// 	return len(this.stack) == 0
+// }
+
+type MyQueue struct {
+	stack []int
+	temp  []int
+}
+
+func Constructor() MyQueue {
+	return MyQueue{
+		stack: make([]int, 0),
+		temp:  make([]int, 0),
+	}
+}
+
+func (this *MyQueue) Push(x int) {
+	if len(this.stack) == 0 && len(this.temp) != 0 {
+		for len(this.temp) != 0 {
+			p := this.temp[len(this.temp)-1]
+			this.temp = this.temp[:len(this.temp)-1]
+			this.stack = append(this.stack, p)
+		}
+	}
+	this.stack = append(this.stack, x)
+}
+
+func (this *MyQueue) Pop() int {
+	// var pop int
+	// for {
+	// 	pop = this.stack[len(this.stack)-1]
+	// 	this.stack = this.stack[:len(this.stack)-1]
+	// 	if len(this.stack) == 0 {
+	// 		break
+	// 	}
+	// 	this.temp = append(this.temp, pop)
+	// }
+	// for len(this.temp) != 0 {
+	// 	p := this.temp[len(this.temp)-1]
+	// 	this.temp = this.temp[:len(this.temp)-1]
+	// 	this.stack = append(this.stack, p)
+	// }
+	if len(this.stack) == 0 && len(this.temp) == 0 {
+		return 0
+	}
+	pop := this.Peek()
+	this.temp = this.temp[:len(this.temp)-1]
+	return pop
+}
+
+func (this *MyQueue) Peek() int {
+	var pop int
+	if len(this.stack) == 0 && len(this.temp) == 0 {
+		return 0
+	}
+	if len(this.temp) > 0 {
+		return this.temp[len(this.temp)-1]
+	}
+	for len(this.stack) > 0 {
+		pop = this.stack[len(this.stack)-1]
+		this.stack = this.stack[:len(this.stack)-1]
+		this.temp = append(this.temp, pop)
+	}
+	// for len(this.temp) != 0 {
+	// 	p := this.temp[len(this.temp)-1]
+	// 	this.temp = this.temp[:len(this.temp)-1]
+	// 	this.stack = append(this.stack, p)
+	// }
+	return pop
+}
+
+func (this *MyQueue) Empty() bool {
+	return len(this.stack) == 0 && len(this.temp) == 0
+}
+
+func updateMatrix(mat [][]int) [][]int {
+	m, n := len(mat), len(mat[0])
+	queue := make([][]int, 0)
+	visited := make([][]bool, m)
+	for i := range visited {
+		visited[i] = make([]bool, n)
+	}
+	for i := 0; i < m; i++ {
+		for j := 0; j < n; j++ {
+			if mat[i][j] == 0 {
+				queue = append(queue, []int{i, j})
+				visited[i][j] = true
+			}
+		}
+	}
+	for len(queue) > 0 {
+		i := queue[0][0]
+		j := queue[0][1]
+		queue = queue[1:]
+
+		direction := [][]int{[]int{i - 1, j}, []int{i + 1, j}, []int{i, j - 1}, []int{i, j + 1}}
+		for _, d := range direction {
+			p, q := d[0], d[1]
+			if p > 0 && p < m && q > 0 && q < n && mat[p][q] == 1 && !visited[p][q] {
+				mat[p][q] = mat[i][j] + 1
+				queue = append(queue, []int{p, q})
+				visited[p][q] = true
+			}
+		}
+
+	}
+	return mat
+}

@@ -175,3 +175,51 @@ func (g *graphAdjList) print() {
 		builder.Reset()
 	}
 }
+
+// 图的广度优先遍历BFS
+func graphBFS(g *graphAdjList, startVet Vertex) []Vertex {
+	res := make([]Vertex, 0)
+	visited := make(map[Vertex]struct{})
+	//visited[startVet] = struct{}{}
+	queue := make([]Vertex, 0)
+	queue = append(queue, startVet)
+	for len(queue) > 0 {
+		vet := queue[0]
+		res = queue[1:]
+		if _, ok := visited[vet]; ok {
+			continue
+		}
+		visited[vet] = struct{}{}
+		res = append(res, vet)
+		for i := range g.adjList[vet] {
+			nvet := g.adjList[vet][i]
+			if _, ok := visited[nvet]; !ok {
+				queue = append(queue, g.adjList[vet][i])
+			}
+		}
+	}
+	return res
+}
+
+// 图的深度优先遍历DFS
+
+func graphDFS(g *graphAdjList, startVet Vertex) []Vertex {
+	visited := make(map[Vertex]struct{})
+	res := make([]Vertex, 0)
+	dfs(g, visited, &res, startVet)
+	return res
+}
+
+func dfs(g *graphAdjList, visited map[Vertex]struct{}, res *[]Vertex, vet Vertex) {
+	// if _, ok := visited[vet]; ok {
+	// 	return
+	// }
+	visited[vet] = struct{}{}
+	*res = append(*res, vet)
+	for _, adjVet := range g.adjList[vet] {
+		if _, ok := visited[adjVet]; !ok {
+			dfs(g, visited, res, adjVet)
+		}
+
+	}
+}
