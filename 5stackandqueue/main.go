@@ -827,8 +827,10 @@ func updateMatrix(mat [][]int) [][]int {
 	column := len(mat[0])
 	res := make([][]int, row)
 	for i := range res {
-		// res[i] = make([]int, column)
-		for j := range res[i] {
+		res[i] = make([]int, column)
+	}
+	for i := 0; i < row; i++ {
+		for j := 0; j < column; j++ {
 			res[i][j] = math.MaxInt
 		}
 	}
@@ -852,37 +854,46 @@ func updateMatrix(mat [][]int) [][]int {
 			}
 		}
 	}
-	// 水平向左 和 竖直向下
+	/*
+		// 水平向左 和 竖直向下
+		for i := row - 1; i >= 0; i-- {
+			for j := 0; j < column; j++ {
+				// 竖直向下
+				if i+1 < row {
+					res[i][j] = min(res[i][j], res[i+1][j]+1)
+				}
+				// 水平向左
+				if j-1 >= 0 {
+					res[i][j] = min(res[i][j], res[i][j-1]+1)
+				}
+			}
+		}
+		// 水平向右 和 竖直向上
+		for i := 0; i < row; i++ {
+			for j := column - 1; j >= 0; j-- {
+				// 竖直向上
+				if i-1 >= 0 {
+					res[i][j] = min(res[i][j], res[i-1][j]+1)
+				}
+				if j+1 < column {
+					res[i][j] = min(res[i][j], res[i][j+1]+1)
+				}
+			}
+		}
+	*/
+	// 水平向右 和 竖直向下
 	for i := row - 1; i >= 0; i-- {
-		for j := 0; j < column; j++ {
-			// 竖直向下
+		for j := column - 1; j >= 0; j-- {
 			if i+1 < row {
 				res[i][j] = min(res[i][j], res[i+1][j]+1)
 			}
-			// 水平向左
-			if j -1 >=0 {
-				res[i][j] = min(res[i][j], res[i][j-1]+1)
+			if j+1 < column {
+				res[i][j] = min(res[i][j], res[i][j+1]+1)
 			}
 		}
 	}
-	// 水平向右 和 竖直向下
-	for 
 	return res
 }
-
-// func dp(i, j int, mat [][]int) int {
-// 	// visited[i][j] = true
-// 	if mat[i][j] == 0 {
-// 		return 0
-// 	}
-// 	// if mat[i][j] == 1 {
-// 	upAndLeft := min(dp(i-1, j, mat), dp(i, j-1, mat)) + 1
-// 	downAndLeft := min(dp(i+1, j, mat), dp(i, j-1, mat)) + 1
-// 	upAndRight := min(dp(i-1, j, mat), dp(i, j+1, mat)) + 1
-// 	downAndRight := min(dp(i+1, j, mat), dp(i, j+1, mat))
-// 	return min(min(min(upAndLeft, downAndLeft), upAndRight), downAndRight)
-// 	// }
-// }
 
 func min(a, b int) int {
 	if a < b {
