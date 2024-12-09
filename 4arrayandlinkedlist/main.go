@@ -178,86 +178,202 @@ func partition(head *ListNode, x int) *ListNode {
 	return dummy.Next
 }
 
-// 排序链表
+// 148 排序链表
+// func sortList(head *ListNode) *ListNode {
+// 	return sort(head, nil)
+// }
+
+// func sort(head, tail *ListNode) *ListNode {
+// 	if head == nil {
+// 		return head
+// 	}
+// 	if head.Next == tail {
+// 		head.Next = nil
+// 		return head
+// 	}
+// 	slow, fast := head, head
+// 	for fast != tail {
+// 		slow = slow.Next
+// 		fast = fast.Next
+// 		if fast != nil {
+// 			fast = fast.Next
+// 		}
+// 	}
+// 	mid := slow
+// 	return merge(sort(head, mid), sort(mid, tail))
+// }
+// func merge(head1, head2 *ListNode) *ListNode {
+// 	dummy := &ListNode{}
+// 	temp, temp1, temp2 := dummy, head1, head2
+// 	for temp1 != nil && temp2 != nil {
+// 		if temp1.Val < temp2.Val {
+// 			temp.Next = temp1
+// 			temp1 = temp1.Next
+// 		} else {
+// 			temp.Next = temp2
+// 			temp2 = temp2.Next
+// 		}
+// 		temp = temp.Next
+// 	}
+// 	if temp1 != nil {
+// 		temp.Next = temp1
+// 	} else {
+// 		temp.Next = temp2
+// 	}
+// 	return dummy.Next
+// }
+
+// 链表排序
+// 归并排序，每一次都将链表一分为二（通过快慢指针来找到链表中点），
+// 需要传入链表的头节点和尾节点
+// 直到链表元素只有一个时，合并链表
+
 func sortList(head *ListNode) *ListNode {
-	return sort(head, nil)
+	return merge(head, nil)
 }
 
-func sort(head, tail *ListNode) *ListNode {
+func merge(head, tail *ListNode) *ListNode {
 	if head == nil {
-		return head
+		return nil
 	}
+
 	if head.Next == tail {
 		head.Next = nil
 		return head
 	}
+	//快慢指针找中点
 	slow, fast := head, head
 	for fast != tail {
 		slow = slow.Next
 		fast = fast.Next
-		if fast != nil {
+		if fast != tail {
 			fast = fast.Next
 		}
 	}
 	mid := slow
-	return merge(sort(head, mid), sort(mid, tail))
+	return sort(merge(head, mid), merge(mid, tail))
 }
-func merge(head1, head2 *ListNode) *ListNode {
+
+func sort(head1, head2 *ListNode) *ListNode {
 	dummy := &ListNode{}
-	temp, temp1, temp2 := dummy, head1, head2
-	for temp1 != nil && temp2 != nil {
-		if temp1.Val < temp2.Val {
-			temp.Next = temp1
-			temp1 = temp1.Next
+	temp, left, right := dummy, head1, head2
+	for left != nil && right != nil {
+		if left.Val <= right.Val {
+			temp.Next = left
+			left = left.Next
 		} else {
-			temp.Next = temp2
-			temp2 = temp2.Next
+			temp.Next = right
+			right = right.Next
 		}
 		temp = temp.Next
 	}
-	if temp1 != nil {
-		temp.Next = temp1
+	if left != nil {
+		temp.Next = left
 	} else {
-		temp.Next = temp2
+		temp.Next = right
 	}
 	return dummy.Next
 }
 
-// func mergeSort(nums []int, i, j int) {
+// 143重排链表
+// 方法一线性表 遍历链表，放进切片中，再原地组合链表
+// func reorderList(head *ListNode) {
 
-// 	if i >= j {
-// 		return
+// 	var count, i int
+// 	node := head
+// 	for node != nil {
+// 		count++
+// 		node = node.Next
 // 	}
-// 	mid := i + (j-i)/2
-// 	mergeSort(nums, i, mid)
-// 	mergeSort(nums, mid+1, j)
-// 	merge(nums, i, mid, j)
-// }
-
-// func merge(nums []int, left, mid, right int) {
-// 	temp := make([]int, right-left+1)
-// 	i, j, k := left, mid+1, 0
-// 	for i < j && j <= right {
-// 		if nums[i] <= nums[j] {
-// 			temp[k] = nums[i]
-// 			i++
-// 		} else {
-// 			temp[k] = nums[j]
-// 			j++
-// 		}
-// 		k++
-// 	}
-// 	for i < j {
-// 		temp[k] = nums[i]
+// 	nodeTable := make([]*ListNode, count)
+// 	for head != nil {
+// 		nodeTable[i] = head
 // 		i++
-// 		k++
+// 		head = head.Next
 // 	}
-// 	for j <= right {
-// 		temp[k] = nums[j]
-// 		j++
-// 		k++
+// 	for i, j := 0, count-i-1; i < j; i++ {
+// 		nodeTable[i].Next = nodeTable[j]
+// 		if i+1 < j {
+// 			nodeTable[j].Next = nodeTable[i+1]
+// 		} else {
+// 			nodeTable[j].Next = nil
+// 		}
 // 	}
-// 	for i, num := range temp {
-// 		nums[left+i] = num
-// 	}
+
 // }
+
+// 方法二 找链表中点，分成两个链表，把后面的链表反转，再合并
+
+func reorderList(head *ListNode) {
+	// 快慢指针找中点
+	fast, slow := head, head
+	for fast != nil && fast.Next != nil {
+		slow = slow.Next
+		fast = fast.Next.Next
+	}
+	mid := slow
+	r := reverse(mid.Next)
+	mid.Next = nil
+	merge2(head, r)
+
+}
+
+// func reverse(head *ListNode) *ListNode {
+// 	if head == nil || head.Next == nil {
+// 		return head
+// 	}
+// 	node := reverse(head.Next)
+// 	head.Next.Next = head
+// 	head.Next = nil
+// 	return node
+// }
+
+func reverse(head *ListNode) *ListNode {
+	if head == nil {
+		return nil
+	}
+	var prev *ListNode
+	for head != nil {
+		n := head.Next
+		head.Next = prev
+		prev = head
+		if n == nil {
+			break
+		}
+		head = n
+	}
+	return head
+}
+func merge2(head1, head2 *ListNode) {
+	// dummy := &ListNode{}
+	// temp, left, right := dummy , head1, head2
+	var n1, n2 *ListNode
+	for head1 != nil && head2 != nil {
+		n1, n2 = head1.Next, head2.Next
+		head1.Next = head2
+		head1 = n1
+		head2.Next = head1
+		head2 = n2
+		// head1.Next = head2
+	}
+}
+
+// 141 环形链表
+// 快慢指针
+// 快指针会追上慢指针 有环
+func hasCycle(head *ListNode) bool {
+	slow, fast := head, head
+	for fast != nil && fast.Next != nil {
+		slow = slow.Next
+		fast = fast.Next
+		if fast == slow {
+			return true
+		}
+	}
+	return false
+}
+
+// 142 环形链表ii
+func detectCycle(head *ListNode) *ListNode {
+
+}
