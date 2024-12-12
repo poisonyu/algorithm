@@ -361,19 +361,172 @@ func merge2(head1, head2 *ListNode) {
 // 141 环形链表
 // 快慢指针
 // 快指针会追上慢指针 有环
+//
+//	func hasCycle(head *ListNode) bool {
+//		slow, fast := head, head
+//		for fast != nil && fast.Next != nil {
+//			slow = slow.Next
+//			fast = fast.Next
+//			if fast == slow {
+//				return true
+//			}
+//		}
+//		return false
+//	}
+//
+// 哈希表
 func hasCycle(head *ListNode) bool {
-	slow, fast := head, head
-	for fast != nil && fast.Next != nil {
-		slow = slow.Next
-		fast = fast.Next
-		if fast == slow {
+	nodes := make(map[*ListNode]struct{})
+	for head != nil {
+		if _, ok := nodes[head]; ok {
 			return true
 		}
+		nodes[head] = struct{}{}
+		head = head.Next
 	}
 	return false
 }
 
 // 142 环形链表ii
-func detectCycle(head *ListNode) *ListNode {
+// 快慢指针
+// 快慢指针相遇后，快指针从头开始，
+// 与慢指针比较直到相等，即为如环第一节点
 
+// fast 如果初始化为 head.Next 则中点在 slow.Next
+
+// fast 初始化为 head,则中点在 slow
+func detectCycle(head *ListNode) *ListNode {
+	if head == nil {
+		return nil
+	}
+	fast, slow := head.Next, head
+	for fast != nil && fast.Next != nil {
+		if fast == slow {
+			fast = head
+			slow = slow.Next
+			for fast != slow {
+				fast = fast.Next
+				slow = slow.Next
+			}
+			return fast
+		}
+		fast = fast.Next.Next
+		slow = slow.Next
+	}
+	return nil
+}
+
+// func detectCycle(head *ListNode) *ListNode {
+// 	fast, slow := head, head
+// 	for fast != nil && fast.Next != nil {
+// 		slow = slow.Next
+// 		fast = fast.Next.Next
+// 		if fast == slow {
+// 			fast = head
+// 			for fast != slow {
+// 				fast = fast.Next
+// 				slow = slow.Next
+// 			}
+// 			return fast
+// 		}
+// 	}
+// 	return nil
+// }
+
+// 哈希表
+// func detectCycle(head *ListNode) *ListNode {
+// 	nodes := make(map[*ListNode]struct{})
+// 	for head != nil {
+// 		if _, ok := nodes[head]; ok {
+// 			return head
+// 		}
+// 		nodes[head] = struct{}{}
+// 		head = head.Next
+// 	}
+// 	return nil
+// }
+
+// 234 回文链表
+// func isPalindrome(head *ListNode) bool {
+// 	if head == nil {
+// 		return true
+// 	}
+// 	right := head
+// 	r := reverseLinkList(right)
+// 	for head != nil {
+// 		if head != r {
+// 			return false
+// 		}
+// 		head = head.Next
+// 		r = r.Next
+// 	}
+// 	return true
+// }
+
+//	func reverseLinkList(head *ListNode) *ListNode {
+//		if head == nil || head.Next == nil {
+//			return head
+//		}
+//		node := reverseLinkList(head.Next)
+//		head.Next.Next = head
+//		head.Next = nil
+//		return node
+//	}
+//
+// 回文链表的对称性
+// 将值复制到数组中，再用双指针
+func isPalindrome(head *ListNode) bool {
+	nodes := make([]*ListNode, 0)
+	for head != nil {
+		nodes = append(nodes, head)
+		head = head.Next
+	}
+	left, right := 0, len(nodes)-1
+	for left < right {
+		if nodes[left].Val != nodes[right].Val {
+			return false
+		}
+		left++
+		right--
+
+	}
+	return true
+}
+
+type Node struct {
+	Val    int
+	Next   *Node
+	Random *Node
+}
+
+func copyRandomList(head *Node) *Node {
+	dummy := &Node{}
+	hashTable := make(map[*Node]*Node)
+	prev := dummy
+	for head != nil {
+		newRandNode, ok := hashTable[head.Random]
+		if !ok {
+			if head.Random == nil {
+				newRandNode = nil
+			} else {
+				newRandNode = &Node{
+					Val: head.Random.Val,
+				}
+			}
+			hashTable[head.Random] = newRandNode
+		}
+		newHeadNode, ok := hashTable[head]
+		if !ok {
+			newHeadNode = &Node{
+				Val:    head.Val,
+				Random: newRandNode,
+			}
+			hashTable[head] = newHeadNode
+		}
+		prev.Next = newHeadNode
+		prev = prev.Next
+		head = head.Next
+	}
+	prev.Next = nil
+	return dummy.Next
 }
