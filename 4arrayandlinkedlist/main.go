@@ -493,40 +493,83 @@ func isPalindrome(head *ListNode) bool {
 	return true
 }
 
+// 138 随机链表的复制
 type Node struct {
 	Val    int
 	Next   *Node
 	Random *Node
 }
 
+// func copyRandomList(head *Node) *Node {
+// 	dummy := &Node{}
+// 	hashTable := make(map[*Node]*Node)
+// 	prev := dummy
+// 	for head != nil {
+// 		newRandNode, ok := hashTable[head.Random]
+// 		if !ok {
+// 			if head.Random == nil {
+// 				newRandNode = nil
+// 			} else {
+// 				newRandNode = &Node{
+// 					Val: head.Random.Val,
+// 				}
+// 			}
+// 			hashTable[head.Random] = newRandNode
+// 		}
+// 		newHeadNode, ok := hashTable[head]
+// 		if !ok {
+// 			newHeadNode = &Node{
+// 				Val:    head.Val,
+// 				Random: newRandNode,
+// 			}
+// 			hashTable[head] = newHeadNode
+// 		}
+// 		prev.Next = newHeadNode
+// 		prev = prev.Next
+// 		head = head.Next
+// 	}
+// 	prev.Next = nil
+// 	return dummy.Next
+// }
+
+// 回溯 + 哈希表
 func copyRandomList(head *Node) *Node {
-	dummy := &Node{}
-	hashTable := make(map[*Node]*Node)
-	prev := dummy
-	for head != nil {
-		newRandNode, ok := hashTable[head.Random]
-		if !ok {
-			if head.Random == nil {
-				newRandNode = nil
-			} else {
-				newRandNode = &Node{
-					Val: head.Random.Val,
-				}
-			}
-			hashTable[head.Random] = newRandNode
-		}
-		newHeadNode, ok := hashTable[head]
-		if !ok {
-			newHeadNode = &Node{
-				Val:    head.Val,
-				Random: newRandNode,
-			}
-			hashTable[head] = newHeadNode
-		}
-		prev.Next = newHeadNode
-		prev = prev.Next
-		head = head.Next
+	if head == nil {
+		return nil
 	}
-	prev.Next = nil
-	return dummy.Next
+	hashTable := make(map[*Node]*Node)
+	var dfs func(*Node) *Node
+	dfs = func(head *Node) *Node {
+		if head == nil {
+			return nil
+		}
+		newHead, ok := hashTable[head]
+		if ok {
+			return newHead
+		}
+		newHead = &Node{
+			Val: head.Val,
+		}
+		hashTable[head] = newHead
+		newHead.Next = dfs(head.Next)
+		newHead.Random = dfs(head.Random)
+		return newHead
+	}
+	return dfs(head)
 }
+
+// func dfs(head *Node, hashTable map[*Node]*Node) *Node {
+// 	if head == nil {
+// 		return nil
+// 	}
+// 	newHead, ok := hashTable[head]
+// 	if !ok {
+// 		newHead = &Node{
+// 			Val: head.Val,
+// 		}
+// 		hashTable[head] = newHead
+// 	}
+// 	newHead.Next = dfs(head.Next)
+// 	newHead.Random = dfs(head.Random)
+
+// }
